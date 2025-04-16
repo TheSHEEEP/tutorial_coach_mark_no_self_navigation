@@ -55,7 +55,7 @@ class TutorialCoachMark {
   final double paddingFocus;
 
   // if onSkip return false, the overlay will not be dismissed and call `next`
-  final bool Function()? onSkip;
+  final void Function()? onSkip;
   final AlignmentGeometry alignSkip;
   final String textSkip;
   final TextStyle textStyleSkip;
@@ -202,12 +202,7 @@ class TutorialCoachMark {
   }
 
   void skip() {
-    bool removeOverlay = onSkip?.call() ?? true;
-    if (removeOverlay) {
-      _removeOverlay();
-    } else {
-      next();
-    }
+    onSkip?.call();
   }
 
   bool get isShowing => _overlayEntry != null;

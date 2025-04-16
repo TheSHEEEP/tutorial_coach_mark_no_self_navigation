@@ -123,7 +123,11 @@ abstract class AnimatedFocusLightState extends State<AnimatedFocusLight>
     super.dispose();
   }
 
-  void next() => _tapHandler();
+  void next() {
+    if (_isAnimating) return;
+    nextIndex++;
+    _revertAnimation();
+  }
 
   void previous() {
     if (_isAnimating) return;
@@ -137,19 +141,17 @@ abstract class AnimatedFocusLightState extends State<AnimatedFocusLight>
     _revertAnimation();
   }
 
-  Future _tapHandler({
+  void _tapHandler({
     bool targetTap = false,
     bool overlayTap = false,
   }) async {
     if (_isAnimating) return;
-    nextIndex++;
     if (targetTap) {
       await widget.clickTarget?.call(_targetFocus);
     }
     if (overlayTap) {
       await widget.clickOverlay?.call(_targetFocus);
     }
-    return _revertAnimation();
   }
 
   Future _tapHandlerForPosition(TapDownDetails tapDetails) async {
