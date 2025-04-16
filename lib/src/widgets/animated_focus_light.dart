@@ -63,6 +63,42 @@ class AnimatedFocusLight extends StatefulWidget {
       : AnimatedStaticFocusLightState();
 }
 
+class InvisibleClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+class InvisiblePaint extends CustomPainter {
+  final Color color;
+  final double opacityShadow;
+
+  InvisiblePaint({
+    required this.color,
+    required this.opacityShadow,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Paint the entire canvas with the shadow color
+    // This will create a full overlay with no hole
+    final paint = Paint()
+      ..color = color.withValues(alpha: opacityShadow)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
 abstract class AnimatedFocusLightState extends State<AnimatedFocusLight>
     with TickerProviderStateMixin {
   final borderRadiusDefault = 10.0;
@@ -239,42 +275,55 @@ abstract class AnimatedFocusLightState extends State<AnimatedFocusLight>
   }
 
   CustomClipper<Path> _getClipper(ShapeLightFocus? shape) {
-    return shape == ShapeLightFocus.RRect
-        ? RectClipper(
-            progress: _progressAnimated,
-            offset: _getPaddingFocus(),
-            target: _targetPosition ?? TargetPosition(Size.zero, Offset.zero),
-            radius: _targetFocus.radius ?? 0,
-            borderSide: _targetFocus.borderSide,
-          )
-        : CircleClipper(
-            _progressAnimated,
-            _positioned,
-            _sizeCircle,
-            _targetFocus.borderSide,
-          );
+    switch (shape) {
+      case ShapeLightFocus.Circle:
+        return CircleClipper(
+          _progressAnimated,
+          _positioned,
+          _sizeCircle,
+          _targetFocus.borderSide,
+        );
+      case ShapeLightFocus.RRect:
+        return RectClipper(
+          progress: _progressAnimated,
+          offset: _getPaddingFocus(),
+          target: _targetPosition ?? TargetPosition(Size.zero, Offset.zero),
+          radius: _targetFocus.radius ?? 0,
+          borderSide: _targetFocus.borderSide,
+        );
+      case ShapeLightFocus.Invisible:
+      case null:
+        return InvisibleClipper();
+    }
   }
 
   CustomPainter _getPainter(TargetFocus target) {
-    if (target.shape == ShapeLightFocus.RRect) {
-      return LightPaintRect(
-        colorShadow: target.color ?? widget.colorShadow,
-        progress: _progressAnimated,
-        offset: _getPaddingFocus(),
-        target: _targetPosition ?? TargetPosition(Size.zero, Offset.zero),
-        radius: target.radius ?? 0,
-        borderSide: target.borderSide,
-        opacityShadow: widget.opacityShadow,
-      );
-    } else {
-      return LightPaint(
-        _progressAnimated,
-        _positioned,
-        _sizeCircle,
-        colorShadow: target.color ?? widget.colorShadow,
-        borderSide: target.borderSide,
-        opacityShadow: widget.opacityShadow,
-      );
+    switch (target.shape) {
+      case ShapeLightFocus.RRect:
+        return LightPaintRect(
+          colorShadow: target.color ?? widget.colorShadow,
+          progress: _progressAnimated,
+          offset: _getPaddingFocus(),
+          target: _targetPosition ?? TargetPosition(Size.zero, Offset.zero),
+          radius: target.radius ?? 0,
+          borderSide: target.borderSide,
+          opacityShadow: widget.opacityShadow,
+        );
+      case ShapeLightFocus.Circle:
+        return LightPaint(
+          _progressAnimated,
+          _positioned,
+          _sizeCircle,
+          colorShadow: target.color ?? widget.colorShadow,
+          borderSide: target.borderSide,
+          opacityShadow: widget.opacityShadow,
+        );
+      case ShapeLightFocus.Invisible:
+      case null:
+        return InvisiblePaint(
+          color: target.color ?? widget.colorShadow,
+          opacityShadow: widget.opacityShadow,
+        );
     }
   }
 

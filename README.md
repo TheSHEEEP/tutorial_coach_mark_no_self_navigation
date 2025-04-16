@@ -1,4 +1,9 @@
-(Fork note: This version is changed to disable self navigation within the structure so that only the user controls the flow via goTo(), etc. This was done to increase flexibility in all scenarios.)
+## Fork note:  
+This version is changed to disable self navigation within the structure so that only the user controls the flow via goTo(), etc.  
+This was done to increase flexibility in all scenarios.  
+
+Other changes:
+- Added new Invisible shape to enable not drawing any focus at all
 
 [![pub package](https://img.shields.io/pub/v/tutorial_coach_mark.svg)](https://pub.dartlang.org/packages/tutorial_coach_mark)
 [![buymeacoffee](https://i.imgur.com/aV6DDA7.png)](https://www.buymeacoffee.com/rafaelbarbosa)
